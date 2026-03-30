@@ -52,7 +52,8 @@ Formal Interface).
   | RAW_HAZARD | Read-after-write data dependency between consecutive instructions | 143 |
 
   **Result: 196/196 = 100%** (the LLM4DV paper's best published result using
-  Claude 3.5 Sonnet was 5.61%).
+  Claude 3.5 Sonnet was 5.61%). The test programs were written with AI
+  assistance, given the coverage spec and ISA documentation as context.
 
 - **`instruction_monitor.py`** is the coverage monitor, adapted from LLM4DV
   with a bug fix. The original code cleared `last_insn` on every idle cycle
@@ -201,4 +202,4 @@ which RTL lines are uncovered, making it straightforward to target gaps.
 - Coverage model and benchmark bins: [ZixiBenZhang/ml4dv](https://github.com/ZixiBenZhang/ml4dv) (LLM4DV), Apache-2.0
 - `instructions.py`, `shared_types.py`: from LLM4DV, Apache-2.0 (imports adjusted)
 - `instruction_monitor.py`: from LLM4DV, Apache-2.0, with bug fix (idle-cycle `last_insn` clearing removed)
-- `test_decoder.py`, `test_max_coverage.py`, `test_cpu_coverage.py`: original work
+- `test_decoder.py`, `test_max_coverage.py`, `test_cpu_coverage.py`: original work, AI-assisted
