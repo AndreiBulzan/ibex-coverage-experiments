@@ -11,3 +11,11 @@ __pycache__/
 *.dat
 *.xml
 *.log
+
+# Stimulus programs written at runtime
+/tmp/rl_*_program.json
+
+# Trained PPO models larger than ~1 MB are excluded; the zipped models fit in
+# git but the full-sized ones (e.g. ppo_l6.zip at 87 MB) should be regenerated
+# by running the `train_*.py` script in the relevant level directory.
+rl-coverage/level4_shadow/ppo_l6.zip

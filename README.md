@@ -84,6 +84,27 @@ Formal Interface).
   and interrupts. A natural next step is writing tests that exercise these
   paths to push toggle coverage significantly higher.
 
+  That follow-on work lives in [`rl-coverage/`](rl-coverage/) — see
+  ["RL and stimulus-engineering experiments"](#rl-and-stimulus-engineering-experiments)
+  below.
+
+### `rl-coverage/` -- RL and stimulus-engineering experiments
+
+Seven iterations of a program generator (Levels 1–7) pushing Verilator toggle
+coverage up on the real Ibex RTL. The arc starts with small shadow
+environments and PPO training, moves to real-RTL validation, and ends with a
+stimulus-engineering finding that made a random generator beat PPO by 10
+coverage points.
+
+**Headline:** Level 7 reaches **66.27% cumulative toggle in 30 random
+episodes** on minimal Ibex (reachable ceiling 75.9%), up from L5's 56.20% at
+PPO-300-episodes. The lift came from four non-RL changes: data-memory
+prepopulation with an address-XOR pattern (LSU 38%→92%), a trap-safe
+prologue + handler unlocking ECALL/EBREAK, a 29-CSR rotation, and AUIPC.
+
+See [`rl-coverage/README.md`](rl-coverage/README.md) for the full story, a
+level-by-level table, and reproduction instructions.
+
 ### CPU configuration
 
 The cocotb wrapper (`cocotb_ibex.sv`) instantiates Ibex in a minimal
@@ -110,6 +131,9 @@ sudo apt-get install verilator zlib1g-dev
 
 # cocotb (Python-to-simulator bridge)
 pip install 'cocotb>=1.8,<2.0'
+
+# RL experiments under rl-coverage/ additionally need:
+pip install gymnasium stable-baselines3 numpy matplotlib
 ```
 
 Verilator 5.x is required. Check with `verilator --version`.
@@ -172,28 +196,34 @@ You may also need to set `LD_LIBRARY_PATH` to include both
 
 ## Where to go from here
 
-The infrastructure is ready. The loop is: generate instructions, load them into
-the simulated CPU, run, measure coverage. An AI agent slots in at the "generate
-instructions" step.
+Steps 1–3 below are already done and live in [`rl-coverage/`](rl-coverage/):
+adding more instruction types (including 16-bit compressed), exceptions and
+interrupts via a minimal trap handler, and a diverse data-memory model. The
+result on minimal Ibex is **66.27% cumulative toggle** (30 random episodes),
+with a characterised reachable ceiling of **75.9%**.
 
-Concrete next steps for pushing the 17% toggle coverage higher:
+Step 4 — richer configuration — is the next frontier. Concrete queue:
 
-1. **More instruction types** -- add I-type ALU (ADDI, XORI, ...), loads
-   (LB/LH/LW/LBU/LHU), branches (BEQ/BNE/BLT/BGE/...), LUI, AUIPC, JALR,
-   CSR operations, MUL/DIV, and compressed (16-bit) instructions.
+1. **Greedy directed stimulus** targeting the remaining 9.6 points to the
+   75.9% ceiling (1 day). The remaining uncovered-but-reachable bins need
+   instruction *sequences* rather than a diverse random mix, which is
+   exactly what a greedy template search handles. Suggested location:
+   `rl-coverage/level8_directed/`.
 
-2. **Control flow** -- take branches both ways (taken and not-taken), trigger
-   pipeline flushes, exercise the branch predictor (if enabled).
+2. **Rebuild Ibex in the opentitan config** (~1–2 days). Flip `PMPEnable`,
+   `ICache`, `DbgTriggerEn`, `WritebackStage`, `SecureIbex` in
+   `cpu/cocotb_ibex.sv`. The coverage surface grows from ~20k to 50–100k
+   toggle points and our numbers become directly comparable to lowRISC's
+   public 88.7% branch / 90% functional baseline.
 
-3. **Exceptions and interrupts** -- send ECALL/EBREAK, feed illegal
-   instructions, drive `irq_timer_i` / `irq_external_i` from cocotb, set up
-   mtvec and an interrupt handler in the test program.
+3. **Shadow-dense-reward PPO on the Level 7 env** (~2 hours). With a real
+   9.6-point reachable frontier now visible, PPO finally has something to
+   chase that random saturates on. Either it beats random by 2–5 points or
+   it ties — both outcomes are publishable.
 
-4. **Richer configuration** -- enable PMP, ICache, debug triggers, writeback
-   stage in `cocotb_ibex.sv` to expose more RTL paths.
-
-The annotated coverage output (`verilator_coverage --annotate`) shows exactly
-which RTL lines are uncovered, making it straightforward to target gaps.
+The annotated coverage output (`verilator_coverage --annotate`) still shows
+exactly which RTL lines are uncovered, making it straightforward to target
+specific gaps.
 
 
 ## Attribution
