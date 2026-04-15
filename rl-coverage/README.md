@@ -7,6 +7,11 @@ a reachable ceiling of 75.9% — up from **56.2% at L5 PPO-300-episodes**.
 
 The headline finding is at the bottom of this README.
 
+> **New reader?** [`JOURNEY.md`](JOURNEY.md) walks through the seven levels in
+> narrative form — what each level was trying to answer, what happened, what
+> it taught, and what the next level was. Recommended before reading the
+> per-level code.
+
 
 ## TL;DR
 

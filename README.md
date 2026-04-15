@@ -102,8 +102,11 @@ PPO-300-episodes. The lift came from four non-RL changes: data-memory
 prepopulation with an address-XOR pattern (LSU 38%→92%), a trap-safe
 prologue + handler unlocking ECALL/EBREAK, a 29-CSR rotation, and AUIPC.
 
-See [`rl-coverage/README.md`](rl-coverage/README.md) for the full story, a
-level-by-level table, and reproduction instructions.
+See [`rl-coverage/README.md`](rl-coverage/README.md) for a level-by-level
+table and reproduction instructions, or
+[`rl-coverage/JOURNEY.md`](rl-coverage/JOURNEY.md) for the narrative
+walk-through of how each level came about, what it taught, and what it
+pointed at next.
 
 ### CPU configuration
 
